@@ -189,10 +189,6 @@ int main()
 struct FloatType
 {
     float* value;
-
-    FloatType( float v ):
-    value( new float( v ) ) 
-    {};
     
     float add( float lhs, float rhs );
     float subtract( float lhs, float rhs );

@@ -14,9 +14,12 @@ New/This/Pointers/References conclusion
          on the heap without leaking, without using smart pointers. 
  */
 
-
-
-
+struct A {};
+struct HeapA
+{
+    A* a = new A();
+    ~HeapA(){ delete a;}
+};
 
 
 

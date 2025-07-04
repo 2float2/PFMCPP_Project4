@@ -192,34 +192,39 @@ struct FloatType
 
     FloatType( float f ) : value( new float(f) ) { }
     
-    float add( float lhs, float rhs );
-    float subtract( float lhs, float rhs );
-    float multiply( float lhs, float rhs );
-    float divide( float lhs, float rhs );
+    FloatType& add( float a );
+    FloatType& subtract( float s );
+    FloatType& multiply( float m );
+    FloatType& divide( float d );
 };
 
-float FloatType::add( float lhs, float rhs )
+FloatType& FloatType::add( float a )
 {
-    return lhs + rhs;
+    *value += a;
+    return *this;
 }
 
-float FloatType::subtract( float lhs, float rhs)
+FloatType& FloatType::subtract( float s )
 {
-    return lhs - rhs;
+    *value -= s;
+    return *this;
 }
 
-float FloatType::multiply( float lhs, float rhs)
+FloatType& FloatType::multiply( float m )
 {
-    return lhs * rhs;
+    *value *= m;
+    return *this;
 }
 
-float FloatType::divide( float lhs, float rhs)
+FloatType& FloatType::divide( float d )
 {
-    if (rhs == 0.0f)
+    if (d == 0.0f)
     {
         std::cout << "\nwarning, floating point division by zero returns 'inf' !" << std::endl;
     }
-    return lhs / rhs;
+    
+    *value /= d;
+    return *this;
 }
 
 struct DoubleType
@@ -228,34 +233,38 @@ struct DoubleType
 
     DoubleType( double d ) : value( new double(d) ) { }
 
-    double add( double lhs, double rhs );
-    double subtract( double lhs, double rhs );
-    double multiply( double lhs, double rhs );
-    double divide( double lhs, double rhs );
+    DoubleType& add( double a );
+    DoubleType& subtract( double s );
+    DoubleType& multiply( double m );
+    DoubleType& divide( double d );
 };
 
-double DoubleType::add( double lhs, double rhs )
+DoubleType& DoubleType::add( double a )
 {
-    return lhs + rhs;
+    *value += a;
+    return *this;
 }
 
-double DoubleType::subtract( double lhs, double rhs)
+DoubleType& DoubleType::subtract( double s )
 {
-    return lhs - rhs;
+    *value -= s;
+    return *this;
 }
 
-double DoubleType::multiply( double lhs, double rhs)
+DoubleType& DoubleType::multiply( double m )
 {
-    return lhs * rhs;
+    *value *= m;
+    return *this;
 }
 
-double DoubleType::divide( double lhs, double rhs)
+DoubleType& DoubleType::divide( double d )
 {
-    if (rhs == 0.0)
+    if (d == 0.0)
     {
         std::cout << "\nwarning, floating point division by zero returns 'inf' !" << std::endl;
     }
-    return lhs / rhs;
+    *value /= d;
+    return *this;
 }
 
 struct IntType
@@ -264,36 +273,38 @@ struct IntType
 
     IntType( int i ) : value( new int(i) ) { }
 
-    int add( int lhs, int rhs );
-    int subtract( int lhs, int rhs );
-    int multiply( int lhs, int rhs );
-    int divide( int lhs, int rhs );
+    IntType& add( int a );
+    IntType& subtract( int s );
+    IntType& multiply( int m );
+    IntType& divide( int d );
 };
 
-int IntType::add( int lhs, int rhs )
+IntType& IntType::add( int a )
 {
-    return lhs + rhs;
+    *value += a;
+    return *this;
 }
 
-int IntType::subtract( int lhs, int rhs)
+IntType& IntType::subtract( int s )
 {
-    return lhs - rhs;
+    *value -= s;
+    return *this;
 }
 
-int IntType::multiply( int lhs, int rhs)
+IntType& IntType::multiply( int m )
 {
-    return lhs * rhs;
+    *value *= m;
+    return *this;
 }
 
-int IntType::divide( int lhs, int rhs)
+IntType& IntType::divide( int d )
 {
-    if (rhs == 0)
+    if (d == 0.0)
     {
-        std::cout << "error, integer division by zero will crash the program!" << std::endl;
-        std::cout << "returning lhs" << std::endl;
-        return lhs;
+        std::cout << "\nwarning, floating point division by zero returns 'inf' !" << std::endl;
     }
-    else return lhs / rhs;
+    *value /= d;
+    return *this;
 }
 
 int main() 

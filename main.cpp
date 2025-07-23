@@ -440,7 +440,7 @@ void part3()
     std::cout << "The result of FloatType^4 divided by IntType is: " << ft.multiply(ft).multiply(ft).divide(static_cast<float>(it)) << std::endl;
     std::cout << "The result of DoubleType times 3 plus IntType is : " << dt.multiply(3).add(it) << std::endl;
     std::cout << "The result of IntType divided by 3.14 multiplied by DoubleType minus FloatType is: " << it.divide(static_cast<int>(pi)).multiply(static_cast<int>(dt)).subtract(static_cast<int>(ft)) << std::endl;
-    std::cout << "An operation followed by attempts to divide by 0, which are ignored and warns user: " << std::endl;
+    std::cout << "An operation followed by attempts to divide by 0, which are ignored and warns user:" << std::endl;
     std::cout << it.multiply(it).divide(0).divide(0.0f).divide(0.0) << std::endl;
 
     std::cout << "FloatType x IntType  =  " << it.multiply(static_cast<int>(ft)) << std::endl;
@@ -621,14 +621,14 @@ int main()
     std::cout << "Initial value of dt: " << dt << std::endl;
     std::cout << "Initial value of it: " << it << std::endl;
     // --------
-    std::cout << "Use of function concatenation (mixed type arguments) " << std::endl;
+    std::cout << "Use of function concatenation (mixed type arguments)" << std::endl;
     std::cout << "New value of dt = (dt * it) / 5.0f + ft = " << (dt.multiply(static_cast<double>(it)).divide(5.0).add(static_cast<double>(ft))) << std::endl;
 
     std::cout << "---------------------\n" << std::endl;
 
     // Intercept division by 0
     // --------
-    std::cout << "Intercept division by 0 " << std::endl;
+    std::cout << "Intercept division by 0" << std::endl;
     std::cout << "New value of it = it / 0 = " << it.divide(0) << std::endl;
     std::cout << "New value of ft = ft / 0 = " << ft.divide(0) << std::endl;
     std::cout << "New value of dt = dt / 0 = " << dt.divide(0) << std::endl;

@@ -1,16 +1,16 @@
 /*
 Project 4: Part 4 / 9
- Chapter 4 Part 7
- Function/Constructor Overloading
+Chapter 4 Part 7
+Function/Constructor Overloading
 
- Create a branch named Part4
+Create a branch named Part4
 
- Do not delete your previous main. you will be adding to it.
+Do not delete your previous main. you will be adding to it.
 
     Build/Run often with this task to make sure you're not breaking the code with each step.
     I recommend committing after you get each step working so you can revert to a working version easily if needed.
 
- 1) add pow() functions, and a powInternal() function to each of your UDTs
+1) add pow() functions, and a powInternal() function to each of your UDTs
      a) your pow() functions should call powInternal()
      b) add a pow() whose argument type is the primitive your UDT owns.  the argument should be passed by copy.
      c) for each UDT in the file, your class should have pow() overloads that take that UDT as the function argument.
@@ -25,138 +25,138 @@ Project 4: Part 4 / 9
              (const objects can only call their const member functions)
      e) the pow() functions should be chainable.
 
- 2) your powInternal() function should do something like this in its body:    *val = std::pow( *val, arg );
-         where 'arg' is the passed-in type, converted to whatever type your object is holding.
-             if your UDT owns an int, then arg would be an int.
-             if your UDT owns a float, then arg would be a float.
-         std::pow's documentation is found here: https://en.cppreference.com/w/cpp/numeric/math/pow so be sure to include
-             the proper header file listed there.
-         powInternal() should be chainable.
-         powInternal() should be a private member function
+2) your powInternal() function should do something like this in its body:    *val = std::pow( *val, arg );
+     where 'arg' is the passed-in type, converted to whatever type your object is holding.
+         if your UDT owns an int, then arg would be an int.
+         if your UDT owns a float, then arg would be a float.
+     std::pow's documentation is found here: https://en.cppreference.com/w/cpp/numeric/math/pow so be sure to include
+         the proper header file listed there.
+     powInternal() should be chainable.
+     powInternal() should be a private member function
 
- 3) modify the Point class below to have 3 Constructors that accept your UDTs and one that accepts primitives.
+3) modify the Point class below to have 3 Constructors that accept your UDTs and one that accepts primitives.
      a) make the constructor that takes primitives initialize the two member variables.
      b) for each of your 3 Ctors that accept UDTs: correctly implement a Delegating Constructor that calls the constructor which takes primitives
      c) overload the multiply() function so it can accept each of your UDTs.  I've added an implementation you can mimick for this function.
      d) add a toString() function to the Point class that prints out the x and y members via std::cout.
 
- 4) mark your UDT constructors as 'explicit'.
+4) mark your UDT constructors as 'explicit'.
     Adding this keyword prevents the compiler from implicitly creating instances of your UDT whenever primitives are passed to functions that take your UDT by const reference.
     This keyword means you can only create an instance of the class by Explicitly writing the type name.
     You can learn more about the explicit keyword here:
     https://en.cppreference.com/w/cpp/language/explicit
 
- 5) insert part4(); at the end of main, before the 'good to go'
+5) insert part4(); at the end of main, before the 'good to go'
 
- 6) make sure it compiles without errors.
+6) make sure it compiles without errors.
 
- You will need to use Forward Declaration and out-of-class definitions to complete this.
- */
-
-
+You will need to use Forward Declaration and out-of-class definitions to complete this.
+*/
 
 
 
 
- /*
- your program should generate the following output EXACTLY.
- This includes the warnings.
- The output should have zero warnings.
 
 
- FloatType add result=4
- FloatType subtract result=2
- FloatType multiply result=4
- FloatType divide result=0.25
+/*
+your program should generate the following output EXACTLY.
+This includes the warnings.
+The output should have zero warnings.
 
- DoubleType add result=4
- DoubleType subtract result=2
- DoubleType multiply result=4
- DoubleType divide result=0.8
 
- IntType add result=4
- IntType subtract result=2
- IntType multiply result=4
- IntType divide result=1
+FloatType add result=4
+FloatType subtract result=2
+FloatType multiply result=4
+FloatType divide result=0.25
 
- Chain calculation = 590
- New value of ft = (ft + 3.0f) * 1.5f / 5.0f = 0.975
- ---------------------
+DoubleType add result=4
+DoubleType subtract result=2
+DoubleType multiply result=4
+DoubleType divide result=0.8
 
- Initial value of dt: 0.8
- Initial value of it: 590
- Use of function concatenation (mixed type arguments)
- New value of dt = (dt * it) / 5.0f + ft = 95.375
- ---------------------
+IntType add result=4
+IntType subtract result=2
+IntType multiply result=4
+IntType divide result=1
 
- Intercept division by 0
- New value of it = it / 0 = error: integer division by zero is an error and will crash the program!
- 590
- New value of ft = ft / 0 = warning: floating point division by zero!
- inf
- New value of dt = dt / 0 = warning: floating point division by zero!
- inf
- ---------------------
+Chain calculation = 590
+New value of ft = (ft + 3.0f) * 1.5f / 5.0f = 0.975
+---------------------
 
- The result of FloatType^4 divided by IntType is: 26.9136
- The result of DoubleType times 3 plus IntType is : 67.3
- The result of IntType divided by 3.14 multiplied by DoubleType minus FloatType is: 711
- An operation followed by attempts to divide by 0, which are ignored and warns user:
- error: integer division by zero is an error and will crash the program!
- error: integer division by zero is an error and will crash the program!
- error: integer division by zero is an error and will crash the program!
- 505521
- FloatType x IntType  =  13143546
- (IntType + DoubleType + FloatType) x 24 = 315447336
- Power tests with FloatType
- pow(ft1, floatExp) = 2^2 = 4
- pow(ft1, itExp) = 4^2 = 16
- pow(ft1, ftExp) = 16^2 = 256
- pow(ft1, dtExp) = 256^2 = 65536
- ---------------------
+Initial value of dt: 0.8
+Initial value of it: 590
+Use of function concatenation (mixed type arguments)
+New value of dt = (dt * it) / 5.0f + ft = 95.375
+---------------------
 
- Power tests with DoubleType
- pow(dt1, doubleExp) = 2^2 = 4
- pow(dt1, itExp) = 4^2 = 16
- pow(dt1, ftExp) = 16^2 = 256
- pow(dt1, dtExp) = 256^2 = 65536
- ---------------------
+Intercept division by 0
+New value of it = it / 0 = error: integer division by zero is an error and will crash the program!
+590
+New value of ft = ft / 0 = warning: floating point division by zero!
+inf
+New value of dt = dt / 0 = warning: floating point division by zero!
+inf
+---------------------
 
- Power tests with IntType
- pow(it1, intExp) = 2^2 = 4
- pow(it1, itExp) = 4^2 = 16
- pow(it1, ftExp) = 16^2 = 256
- pow(it1, dtExp) = 256^2 = 65536
- ===============================
+The result of FloatType^4 divided by IntType is: 26.9136
+The result of DoubleType times 3 plus IntType is : 67.3
+The result of IntType divided by 3.14 multiplied by DoubleType minus FloatType is: 711
+An operation followed by attempts to divide by 0, which are ignored and warns user:
+error: integer division by zero is an error and will crash the program!
+error: integer division by zero is an error and will crash the program!
+error: integer division by zero is an error and will crash the program!
+505521
+FloatType x IntType  =  13143546
+(IntType + DoubleType + FloatType) x 24 = 315447336
+Power tests with FloatType
+pow(ft1, floatExp) = 2^2 = 4
+pow(ft1, itExp) = 4^2 = 16
+pow(ft1, ftExp) = 16^2 = 256
+pow(ft1, dtExp) = 256^2 = 65536
+---------------------
 
- Point tests with float argument:
- Point { x: 3, y: 6 }
- Multiplication factor: 6
- Point { x: 18, y: 36 }
- ---------------------
+Power tests with DoubleType
+pow(dt1, doubleExp) = 2^2 = 4
+pow(dt1, itExp) = 4^2 = 16
+pow(dt1, ftExp) = 16^2 = 256
+pow(dt1, dtExp) = 256^2 = 65536
+---------------------
 
- Point tests with FloatType argument:
- Point { x: 3, y: 3 }
- Multiplication factor: 3
- Point { x: 9, y: 9 }
- ---------------------
+Power tests with IntType
+pow(it1, intExp) = 2^2 = 4
+pow(it1, itExp) = 4^2 = 16
+pow(it1, ftExp) = 16^2 = 256
+pow(it1, dtExp) = 256^2 = 65536
+===============================
 
- Point tests with DoubleType argument:
- Point { x: 3, y: 4 }
- Multiplication factor: 4
- Point { x: 12, y: 16 }
- ---------------------
+Point tests with float argument:
+Point { x: 3, y: 6 }
+Multiplication factor: 6
+Point { x: 18, y: 36 }
+---------------------
 
- Point tests with IntType argument:
- Point { x: 3, y: 4 }
- Multiplication factor: 5
- Point { x: 15, y: 20 }
- ---------------------
+Point tests with FloatType argument:
+Point { x: 3, y: 3 }
+Multiplication factor: 3
+Point { x: 9, y: 9 }
+---------------------
 
- good to go!
+Point tests with DoubleType argument:
+Point { x: 3, y: 4 }
+Multiplication factor: 4
+Point { x: 12, y: 16 }
+---------------------
 
-  Use a service like https://www.diffchecker.com/diff to compare your output.
-  */
+Point tests with IntType argument:
+Point { x: 3, y: 4 }
+Multiplication factor: 5
+Point { x: 15, y: 20 }
+---------------------
+
+good to go!
+
+Use a service like https://www.diffchecker.com/diff to compare your output.
+*/
 
 struct A {};
 struct HeapA

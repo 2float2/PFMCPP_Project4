@@ -260,7 +260,7 @@ struct FloatType
     FloatType& pow(const DoubleType&);
     FloatType& pow(const IntType&);
 
-    FloatType& apply(std::function<FloatType&(float&)>);
+    FloatType& apply(std::function<FloatType&(float&)> func);
     FloatType& apply(void(*funcPtr)(float&));
 
     operator float() const { return *value; }
@@ -285,7 +285,7 @@ struct DoubleType
     DoubleType& pow(const DoubleType&);
     DoubleType& pow(const IntType&);
 
-    DoubleType& apply(std::function<DoubleType&(double&)>);
+    DoubleType& apply(std::function<DoubleType&(double&)> func);
     DoubleType& apply(void(*funcPtr)(double&));
 
     operator double() const { return *value; }
@@ -310,7 +310,7 @@ struct IntType
     IntType& pow(const DoubleType&);
     IntType& pow(const IntType&);
 
-    IntType& apply(std::function<IntType&(int&)>);
+    IntType& apply(std::function<IntType&(int&)> func);
     IntType& apply(void(*funcPtr)(int&));
 
     operator int() const { return *value; }
@@ -376,6 +376,18 @@ FloatType& FloatType::pow(const IntType& it)
     return powInternal(static_cast<float>(it));
 }
 
+FloatType& FloatType::apply(std::function<FloatType&(float&)> func)
+{
+    if(func)
+        func();
+}
+
+FloatType& FloatType::apply(void(*funcPtr)(float&))
+{
+    if(funcPtr)
+        funcPtr();
+}
+
 DoubleType& DoubleType::operator+=(double a)
 {
     *value += a;
@@ -428,6 +440,18 @@ DoubleType& DoubleType::pow(const DoubleType& dt)
 DoubleType& DoubleType::pow(const IntType& it)
 {
     return powInternal(static_cast<double>(it));
+}
+
+DoubleType& DoubleType::apply(std::function<DoubleType&(double&)> func)
+{
+    if(func)
+        func();
+}
+
+DoubleType& DoubleType::apply(void(*funcPtr)(double&))
+{
+    if(funcPtr)
+        funcPtr();
 }
 
 IntType& IntType::operator+=(int a)
@@ -485,6 +509,18 @@ IntType& IntType::pow(const DoubleType& dt)
 IntType& IntType::pow(const IntType& it)
 {
     return powInternal(static_cast<int>(it));
+}
+
+IntType& IntType::apply(std::function<IntType&(int&)> func)
+{
+    if(func)
+        func();
+}
+
+IntType& IntType::apply(void(*funcPtr)(IntType&))
+{
+    if(funcPtr)
+        funcPtr();
 }
 
 void part3()

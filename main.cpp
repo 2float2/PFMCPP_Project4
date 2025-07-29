@@ -261,7 +261,7 @@ struct FloatType
     FloatType& pow(const IntType&);
 
     FloatType& apply(std::function<FloatType&(float&)>);
-    FloatType& apply(void(*funcPtr)());
+    FloatType& apply(void(*funcPtr)(float&));
 
     operator float() const { return *value; }
 
@@ -286,7 +286,7 @@ struct DoubleType
     DoubleType& pow(const IntType&);
 
     DoubleType& apply(std::function<DoubleType&(double&)>);
-    DoubleType& apply(void(*funcPtr)());
+    DoubleType& apply(void(*funcPtr)(double&));
 
     operator double() const { return *value; }
 
@@ -311,7 +311,7 @@ struct IntType
     IntType& pow(const IntType&);
 
     IntType& apply(std::function<IntType&(int&)>);
-    IntType& apply(void(*funcPtr)());
+    IntType& apply(void(*funcPtr)(int&));
 
     operator int() const { return *value; }
 

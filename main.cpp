@@ -345,7 +345,7 @@ FloatType& FloatType::pow(const IntType& it)
 FloatType& FloatType::apply(std::function<FloatType&(float& f)> func)
 {
     if(func)
-        func(*value);
+        return func(*value);
 
     return *this;
 }
@@ -420,7 +420,7 @@ DoubleType& DoubleType::pow(const IntType& it)
 DoubleType& DoubleType::apply(std::function<DoubleType&(double&)> func)
 {
     if(func)
-        func(*value);
+        return func(*value);
 
     return *this;
 }
@@ -498,7 +498,7 @@ IntType& IntType::pow(const IntType& it)
 IntType& IntType::apply(std::function<IntType&(int&)> func)
 {
     if(func)
-        func(*value);
+        return func(*value);
 
     return *this;
 }

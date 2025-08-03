@@ -776,6 +776,7 @@ void part4()
     std::cout << "---------------------\n" << std::endl;
 }
 
+/*
 void part6()
 {
     FloatType ft3(3.0f);
@@ -825,6 +826,7 @@ void part6()
     std::cout << "it3 after: " << it3 << std::endl;
     std::cout << "---------------------\n" << std::endl;    
 }
+*/
 
 int main()
 {
@@ -921,7 +923,7 @@ int main()
 
     part3();
     part4();
-    part6();
+    //part6();
 
     std::cout << "good to go!\n";
 

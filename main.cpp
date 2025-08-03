@@ -294,13 +294,15 @@ struct HeapA
 #include <iostream>
 #include <cmath>
 #include <functional>
+#include <memory>
 
 struct DoubleType;
 struct IntType;
 struct FloatType
 {
-    explicit FloatType(float f) : value(new float(f)) {}
-    ~FloatType() { delete value; }
+    //explicit FloatType(float f) : value(new float(f)) {}
+    explicit FloatType(float f) : value(std::make_unique<float>(f)){ }
+    //~FloatType() { delete value; }
 
     FloatType& operator+=(float a);
     FloatType& operator-=(float s);
@@ -311,21 +313,23 @@ struct FloatType
     FloatType& pow(const DoubleType&);
     FloatType& pow(const IntType&);
 
-    FloatType& apply(std::function<FloatType&(float&)> func);
+
+    //FloatType& apply(std::function<FloatType&(float&)> func);
+    FloatType& apply(std::function<FloatType&(std::unique_ptr<float>&)> func);
     FloatType& apply(void(*funcPtr)(float&));
 
     operator float() const { return *value; }
 
 private:
-    float* value;
+    std::unique_ptr<float> value;
 
     FloatType& powInternal(float);
 };
 
 struct DoubleType
 {
-    explicit DoubleType(double d) : value(new double(d)) {}
-    ~DoubleType() { delete value; }
+    explicit DoubleType(double d) : value(std::make_unique<double>(d)) {}
+    //~DoubleType() { delete value; }
 
     DoubleType& operator+=(double a);
     DoubleType& operator-=(double s);
@@ -336,21 +340,22 @@ struct DoubleType
     DoubleType& pow(const DoubleType&);
     DoubleType& pow(const IntType&);
 
-    DoubleType& apply(std::function<DoubleType&(double&)> func);
+    //DoubleType& apply(std::function<DoubleType&(double&)> func);
+    DoubleType& apply(std::function<DoubleType&(std::unique_ptr<double>&)> func);
     DoubleType& apply(void(*funcPtr)(double&));
 
     operator double() const { return *value; }
 
 private:
-    double* value;
+    std::unique_ptr<double> value;
 
     DoubleType& powInternal(double);
 };
 
 struct IntType
 {
-    explicit IntType(int i) : value(new int(i)) {}
-    ~IntType() { delete value; }
+    explicit IntType(int i) : value(std::make_unique<int>(i)) {}
+    //~IntType() { delete value; }
 
     IntType& operator+=(int a);
     IntType& operator-=(int s);
@@ -361,13 +366,14 @@ struct IntType
     IntType& pow(const DoubleType&);
     IntType& pow(const IntType&);
 
-    IntType& apply(std::function<IntType&(int&)> func);
+    //IntType& apply(std::function<IntType&(int&)> func);
+    IntType& apply(std::function<IntType&(std::unique_ptr<int>&)> func);
     IntType& apply(void(*funcPtr)(int&));
 
     operator int() const { return *value; }
 
 private:
-    int* value;
+    std::unique_ptr<int> value;
 
     IntType& powInternal(int);
 };

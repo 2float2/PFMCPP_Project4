@@ -326,6 +326,92 @@ private:
     }
 };
 
+template<>
+struct Numeric<double>
+{
+    using Type = double;
+
+    //explicit FloatType(float f) : value(new float(f)) {}
+    explicit Numeric(Type f) : value(std::make_unique<Type>(f)){ }
+    ~Numeric() {}
+
+    Numeric& operator+=(Type a)
+    {
+        *value += a;
+        return *this;
+    }
+
+    Numeric& operator-=(Type s)
+    {
+        *value -= s;
+        return *this;
+    }
+
+    Numeric& operator*=(Type m)
+    {
+        *value *= m;
+        return *this;
+    }
+
+    template<typename U>
+    Numeric& operator/=(U d)
+    {
+        /*
+        #11) now that your class is templated, you'll need to adjust your logic in your division function to handle if your input is a zero or not, based on your templated type.  
+        Note: this instruction does not apply to the explicit template specialization
+        - look up how to use std::is_same<>::value on cppreference to determine the type of your template parameter.
+
+        - look up how to use std::numeric_limits<>::epsilon() to determine if you're dividing by a floating point 0
+        */
+        
+        //Type = float
+        if(std::is_same<float, U>::value)
+
+        //Type = double
+
+        //Type = int
+
+        
+        if (d == 0.0f)
+        {
+            std::cout << "warning: floating point division by zero!" << std::endl;
+        }
+
+        *value /= d;
+        return *this;
+    }
+
+    Numeric& pow(Type f)
+    {
+        return powInternal(f);
+    }
+
+
+    Numeric& pow(const Numeric& ft)
+    {
+        return powInternal(static_cast<Type>(ft));
+    }
+
+
+    template<typename Callable>
+    Numeric& apply(Callable callable)
+    {
+        callable(*this);
+        return *this;
+    }
+
+    operator Type() const { return *value; }
+
+private:
+    std::unique_ptr<Type> value = nullptr;
+
+    Numeric& powInternal(Type arg)
+    {
+        *value = std::pow(*value, arg);
+        return *this;
+    }
+};
+
 
 /*
 FloatType& FloatType::operator+=(float a)
@@ -714,23 +800,6 @@ void part4()
     std::cout << "---------------------\n" << std::endl;
 }
 
-//std::cout << "Calling Numeric<float>::apply() twice using a free function (adds 7.0f) and void as return type:" << std::endl;
-
-void myNumericFreeFunct(Numeric<float>& n)
-{
-    n += 7.0f;
-}
-
-void myNumericFreeFunct(Numeric<double>& n)
-{
-    n += 6.0;
-}
-
-void myNumericFreeFunct(Numeric<int>& n)
-{
-    n += 5;
-}
-
 /*
 void part6()
 {
@@ -783,6 +852,12 @@ void part6()
 }
 */
 
+template<typename T>
+void myNumericFreeFunct(Numeric<T>& n)
+{
+    n += 7;
+}
+
 void part7()
 {
     Numeric<float> ft3(3.0f);
@@ -813,8 +888,8 @@ void part7()
             obj += 6.0;
         } ); // This calls the templated apply fcn
     }
-
     std::cout << "dt3 after: " << dt3 << std::endl;
+
     std::cout << "Calling Numeric<double>::apply() twice using a free function (adds 7.0) and void as return type:" << std::endl;
     std::cout << "dt3 before: " << dt3 << std::endl;
     dt3.apply(myNumericFreeFunct<double>).apply(myNumericFreeFunct<double>); // This calls the templated apply fcn

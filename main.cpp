@@ -792,13 +792,14 @@ void part7()
 
     std::cout << "Calling Numeric<float>::apply() using a lambda (adds 7.0f) and Numeric<float> as return type:" << std::endl;
     std::cout << "ft3 before: " << ft3 << std::endl;
-
     {
-        using Type = #4;
-        ft3.apply( [](std::unique...){} );
+        //using Type = #4;
+        ft3.apply( [](Numeric<decltype(ft3)>::Type& obj)-> Numeric<float>& {
+            obj += 7.0f;
+        } );
     }
-
     std::cout << "ft3 after: " << ft3 << std::endl;
+    
     std::cout << "Calling Numeric<float>::apply() twice using a free function (adds 7.0f) and void as return type:" << std::endl;
     std::cout << "ft3 before: " << ft3 << std::endl;
     ft3.apply(myNumericFreeFunct).apply(myNumericFreeFunct);
@@ -809,8 +810,10 @@ void part7()
     std::cout << "dt3 before: " << dt3 << std::endl;
 
     {
-        using Type = #4;
-        dt3.apply( [](std::unique...){} ); // This calls the templated apply fcn
+        //using Type = #4;
+        dt3.apply( [](Numeric<decltype(dt3)>::Type& obj)-> Numeric<double>& {
+            obj += 6.0;
+        } ); // This calls the templated apply fcn
     }
 
     std::cout << "dt3 after: " << dt3 << std::endl;
@@ -822,10 +825,11 @@ void part7()
 
     std::cout << "Calling Numeric<int>::apply() using a lambda (adds 5) and Numeric<int> as return type:" << std::endl;
     std::cout << "it3 before: " << it3 << std::endl;
-
     {
-        using Type = #4;
-        it3.apply( [](std::unique...){} );
+        //using Type = #4;
+        it3.apply( [](Numeric<decltype(it3)>::Type& obj)-> Numeric<int>& {
+            obj += 5;
+        } );
     }
     std::cout << "it3 after: " << it3 << std::endl;
     std::cout << "Calling Numeric<int>::apply() twice using a free function (adds 7) and void as return type:" << std::endl;

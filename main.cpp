@@ -298,18 +298,18 @@ struct Numeric
 
 
     //FloatType& apply(std::function<FloatType&(float&)> func);
-    Numeric& apply(std::function<Numeric&(Type&)> func)
+    Numeric& apply(std::function<Numeric&(Numeric&)> func)
     {
         if(func)
-            return func(*value);
+            return func(*this);
 
         return *this;
     }
 
-    Numeric& apply(void(*funcPtr)(Type&))
+    Numeric& apply(void(*funcPtr)(Numeric&))
     {
         if(funcPtr)
-            funcPtr(*value);
+            funcPtr(*this);
 
         return *this;
     }
@@ -325,6 +325,7 @@ private:
         return *this;
     }
 };
+
 
 /*
 FloatType& FloatType::operator+=(float a)
@@ -559,10 +560,10 @@ void myIntFreeFunct(int& i)
 
 void part3()
 {
-    FloatType ft(5.5f);
-    DoubleType dt(11.1);
-    IntType it(34);
-    DoubleType pi(3.14);
+    Numeric<float> ft(5.5f);
+    Numeric<double> dt(11.1);
+    Numeric<int> it(34);
+    Numeric<double> pi(3.14);
 
     ft *= ft;
     ft *= ft;
@@ -595,26 +596,16 @@ void part3()
     std::cout << "(IntType + DoubleType + FloatType) x 24 = " << it << std::endl;
 }
 
+template<typename U, typename V>
 struct Point
 {
     explicit Point(float xVal, float yVal)
         : x(xVal), y(yVal)
     {
     }
-    explicit Point(const FloatType& ft1, const FloatType& ft2)
+    explicit Point(const U& ft1, const V& ft2)
         :Point(static_cast<float>(ft1), static_cast<float>(ft2))
     {
-    }
-    explicit Point(const DoubleType& dt1, const DoubleType& dt2)
-        :Point(static_cast<float>(dt1), static_cast<float>(dt2))
-    {
-
-    }
-
-    explicit Point(const IntType& it1, const IntType& it2)
-        :Point(static_cast<float>(it1), static_cast<float>(it2))
-    {
-
     }
 
     Point& multiply(float m)
@@ -624,19 +615,10 @@ struct Point
         return *this;
     }
 
-    Point& multiply(FloatType& ft)
+    template<typename T>
+    Point& multiply(T& t)
     {
-        return multiply(static_cast<float>(ft));
-    }
-
-    Point& multiply(DoubleType& dt)
-    {
-        return multiply(static_cast<float>(dt));
-    }
-
-    Point& multiply(IntType& it)
-    {
-        return multiply(static_cast<float>(it));
+        return multiply(static_cast<float>(t));
     }
 
     void toString()
@@ -653,15 +635,15 @@ void part4()
     // ------------------------------------------------------------
     //                          Power tests
     // ------------------------------------------------------------
-    FloatType ft1(2);
-    DoubleType dt1(2);
-    IntType it1(2);    
+    Numeric<float> ft1(2);
+    Numeric<double> dt1(2);
+    Numeric<int> it1(2);    
     float floatExp = 2.0f;
     double doubleExp = 2.0;
     int intExp = 2;
-    IntType itExp(2);
-    FloatType ftExp(2.0f);
-    DoubleType dtExp(2.0);
+    Numeric<int> itExp(2);
+    Numeric<float> ftExp(2.0f);
+    Numeric<double> dtExp(2.0);
 
     // Power tests with FloatType
     std::cout << "Power tests with FloatType " << std::endl;
@@ -690,9 +672,9 @@ void part4()
     // ------------------------------------------------------------
     //                          Point tests
     // ------------------------------------------------------------
-    FloatType ft2(3.0f);
-    DoubleType dt2(4.0);
-    IntType it2(5);
+    Numeric<float> ft2(3.0f);
+    Numeric<double> dt2(4.0);
+    Numeric<int> it2(5);
     float floatMul = 6.0f;
 
     // Point tests with float
@@ -730,6 +712,23 @@ void part4()
     p3.multiply(it2); 
     p3.toString();   
     std::cout << "---------------------\n" << std::endl;
+}
+
+//std::cout << "Calling Numeric<float>::apply() twice using a free function (adds 7.0f) and void as return type:" << std::endl;
+
+void myNumericFreeFunct(Numeric<float>& n)
+{
+    n += 7.0f;
+}
+
+void myNumericFreeFunct(Numeric<double>& n)
+{
+    n += 6.0;
+}
+
+void myNumericFreeFunct(Numeric<int>& n)
+{
+    n += 5;
 }
 
 /*
@@ -794,7 +793,7 @@ void part7()
     std::cout << "ft3 before: " << ft3 << std::endl;
     {
         //using Type = #4;
-        ft3.apply( [](Numeric<decltype(ft3)>::Type& obj)-> Numeric<float>& {
+        ft3.apply( [](Numeric<decltype(ft3)::Type>& obj)-> Numeric<float>& {
             obj += 7.0f;
         } );
     }
@@ -808,10 +807,9 @@ void part7()
 
     std::cout << "Calling Numeric<double>::apply() using a lambda (adds 6.0) and Numeric<double> as return type:" << std::endl;
     std::cout << "dt3 before: " << dt3 << std::endl;
-
     {
         //using Type = #4;
-        dt3.apply( [](Numeric<decltype(dt3)>::Type& obj)-> Numeric<double>& {
+        dt3.apply( [](Numeric<decltype(dt3)::Type>& obj)-> Numeric<double>& {
             obj += 6.0;
         } ); // This calls the templated apply fcn
     }
@@ -827,7 +825,7 @@ void part7()
     std::cout << "it3 before: " << it3 << std::endl;
     {
         //using Type = #4;
-        it3.apply( [](Numeric<decltype(it3)>::Type& obj)-> Numeric<int>& {
+        it3.apply( [](Numeric<decltype(it3)::Type>& obj)-> Numeric<int>& {
             obj += 5;
         } );
     }
@@ -845,9 +843,9 @@ int main()
     HeapA heapA;
 
     //assign heap primitives
-    FloatType ft(2.0f);
-    DoubleType dt(2.0);
-    IntType it(2);
+    Numeric<float> ft(2.0f);
+    Numeric<double> dt(2.0);
+    Numeric<int> it(2);
 
     ft += 2.0f;
     std::cout << "FloatType add result=" << ft << std::endl;

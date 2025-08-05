@@ -869,6 +869,7 @@ void part7()
         //using Type = #4;
         ft3.apply( [](Numeric<decltype(ft3)::Type>& obj)-> Numeric<float>& {
             obj += 7.0f;
+            return obj;
         } );
     }
     std::cout << "ft3 after: " << ft3 << std::endl;
@@ -885,6 +886,7 @@ void part7()
         //using Type = #4;
         dt3.apply( [](Numeric<decltype(dt3)::Type>& obj)-> Numeric<double>& {
             obj += 6.0;
+            return obj;
         } ); // This calls the templated apply fcn
     }
     std::cout << "dt3 after: " << dt3 << std::endl;
@@ -901,6 +903,7 @@ void part7()
         //using Type = #4;
         it3.apply( [](Numeric<decltype(it3)::Type>& obj)-> Numeric<int>& {
             obj += 5;
+            return obj;
         } );
     }
     std::cout << "it3 after: " << it3 << std::endl;
@@ -1007,6 +1010,7 @@ int main()
     part3();
     part4();
     //part6();
+    part7();
 
     std::cout << "good to go!\n";
 

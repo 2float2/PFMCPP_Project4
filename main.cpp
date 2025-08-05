@@ -246,6 +246,7 @@ struct HeapA
 #include <cmath>
 #include <functional>
 #include <memory>
+#include <limits>
 
 template<typename T>
 struct Numeric
@@ -274,14 +275,31 @@ struct Numeric
         return *this;
     }
 
-    Numeric& operator/=(Type d)
+    template<typename U>
+    Numeric& operator/=(U d)
     {
-        if (d == 0.0f)
+        if constexpr (std::is_same<Type,int>::value)
+        {
+            if constexpr (std::is_same<U,int>::value)
+            {
+                if (d == 0)
+                {
+                    std::cout << "error: integer division by zero is an error and will crash the program!" << std::endl;
+                    return *this;
+                }
+            }
+            else if (d <= std::numeric_limits<U>::epsilon())
+            {
+                std::cout << "can't divide integers by zero!" << std::endl;
+                return *this;
+            }
+        }
+        else if (d <= std::numeric_limits<U>::epsilon())
         {
             std::cout << "warning: floating point division by zero!" << std::endl;
         }
 
-        *value /= d;
+        *value /= static_cast<Type>(d);
         return *this;
     }
 
@@ -290,14 +308,11 @@ struct Numeric
         return powInternal(f);
     }
 
-
     Numeric& pow(const Numeric& ft)
     {
         return powInternal(static_cast<Type>(ft));
     }
 
-
-    //FloatType& apply(std::function<FloatType&(float&)> func);
     Numeric& apply(std::function<Numeric&(Numeric&)> func)
     {
         if(func)
@@ -356,28 +371,12 @@ struct Numeric<double>
     template<typename U>
     Numeric& operator/=(U d)
     {
-        /*
-        #11) now that your class is templated, you'll need to adjust your logic in your division function to handle if your input is a zero or not, based on your templated type.  
-        Note: this instruction does not apply to the explicit template specialization
-        - look up how to use std::is_same<>::value on cppreference to determine the type of your template parameter.
-
-        - look up how to use std::numeric_limits<>::epsilon() to determine if you're dividing by a floating point 0
-        */
-        
-        //Type = float
-        if(std::is_same<float, U>::value)
-
-        //Type = double
-
-        //Type = int
-
-        
-        if (d == 0.0f)
+        if (d <= std::numeric_limits<U>::epsilon())
         {
             std::cout << "warning: floating point division by zero!" << std::endl;
         }
 
-        *value /= d;
+        *value /= static_cast<Type>(d);
         return *this;
     }
 

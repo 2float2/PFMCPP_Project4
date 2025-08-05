@@ -385,8 +385,8 @@ struct Numeric<double>
         return powInternal(f);
     }
 
-
-    Numeric& pow(const Numeric& ft)
+    template<typename U>
+    Numeric& pow(const Numeric<U>& ft)
     {
         return powInternal(static_cast<Type>(ft));
     }
@@ -681,13 +681,14 @@ void part3()
     std::cout << "(IntType + DoubleType + FloatType) x 24 = " << it << std::endl;
 }
 
-template<typename U, typename V>
 struct Point
 {
     explicit Point(float xVal, float yVal)
         : x(xVal), y(yVal)
     {
     }
+
+    template<typename U, typename V>
     explicit Point(const U& ft1, const V& ft2)
         :Point(static_cast<float>(ft1), static_cast<float>(ft2))
     {

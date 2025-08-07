@@ -79,56 +79,7 @@ If you need to view an example, see: https://bitbucket.org/MatkatMusic/pfmcpptas
 */
 
 #include <iostream>
-void part7()
-{
-    Numeric ft3(3.0f);
-    Numeric dt3(4.0);
-    Numeric it3(5);
-    
-    std::cout << "Calling Numeric<float>::apply() using a lambda (adds 7.0f) and Numeric<float> as return type:" << std::endl;
-    std::cout << "ft3 before: " << ft3 << std::endl;
 
-    {
-        using Type = #4;
-        ft3.apply( [](std::unique...){} );
-    }
-
-    std::cout << "ft3 after: " << ft3 << std::endl;
-    std::cout << "Calling Numeric<float>::apply() twice using a free function (adds 7.0f) and void as return type:" << std::endl;
-    std::cout << "ft3 before: " << ft3 << std::endl;
-    ft3.apply(myNumericFreeFunct).apply(myNumericFreeFunct);
-    std::cout << "ft3 after: " << ft3 << std::endl;
-    std::cout << "---------------------\n" << std::endl;
-
-    std::cout << "Calling Numeric<double>::apply() using a lambda (adds 6.0) and Numeric<double> as return type:" << std::endl;
-    std::cout << "dt3 before: " << dt3 << std::endl;
-
-    {
-        using Type = #4;
-        dt3.apply( [](std::unique...){} ); // This calls the templated apply fcn
-    }
-    
-    std::cout << "dt3 after: " << dt3 << std::endl;
-    std::cout << "Calling Numeric<double>::apply() twice using a free function (adds 7.0) and void as return type:" << std::endl;
-    std::cout << "dt3 before: " << dt3 << std::endl;
-    dt3.apply(myNumericFreeFunct<double>).apply(myNumericFreeFunct<double>); // This calls the templated apply fcn
-    std::cout << "dt3 after: " << dt3 << std::endl;
-    std::cout << "---------------------\n" << std::endl;
-
-    std::cout << "Calling Numeric<int>::apply() using a lambda (adds 5) and Numeric<int> as return type:" << std::endl;
-    std::cout << "it3 before: " << it3 << std::endl;
-
-    {
-        using Type = #4;
-        it3.apply( [](std::unique...){} );
-    }
-    std::cout << "it3 after: " << it3 << std::endl;
-    std::cout << "Calling Numeric<int>::apply() twice using a free function (adds 7) and void as return type:" << std::endl;
-    std::cout << "it3 before: " << it3 << std::endl;
-    it3.apply(myNumericFreeFunct).apply(myNumericFreeFunct);
-    std::cout << "it3 after: " << it3 << std::endl;
-    std::cout << "---------------------\n" << std::endl;    
-}
 
 /*
 your program should generate the following output EXACTLY.
@@ -294,319 +245,196 @@ struct HeapA
 #include <iostream>
 #include <cmath>
 #include <functional>
+#include <memory>
 
-struct DoubleType;
-struct IntType;
-struct FloatType
+template<typename T>
+struct Numeric
 {
-    explicit FloatType(float f) : value(new float(f)) {}
-    ~FloatType() { delete value; }
+    using Type = T;
 
-    FloatType& operator+=(float a);
-    FloatType& operator-=(float s);
-    FloatType& operator*=(float m);
-    FloatType& operator/=(float d);
-    FloatType& pow(float);
-    FloatType& pow(const FloatType&);
-    FloatType& pow(const DoubleType&);
-    FloatType& pow(const IntType&);
+    explicit Numeric(Type t) : value(std::make_unique<Type>(t)) {}
+    ~Numeric() {}
 
-    FloatType& apply(std::function<FloatType&(float&)> func);
-    FloatType& apply(void(*funcPtr)(float&));
-
-    operator float() const { return *value; }
-
-private:
-    float* value;
-
-    FloatType& powInternal(float);
-};
-
-struct DoubleType
-{
-    explicit DoubleType(double d) : value(new double(d)) {}
-    ~DoubleType() { delete value; }
-
-    DoubleType& operator+=(double a);
-    DoubleType& operator-=(double s);
-    DoubleType& operator*=(double m);
-    DoubleType& operator/=(double d);
-    DoubleType& pow(double);
-    DoubleType& pow(const FloatType&);
-    DoubleType& pow(const DoubleType&);
-    DoubleType& pow(const IntType&);
-
-    DoubleType& apply(std::function<DoubleType&(double&)> func);
-    DoubleType& apply(void(*funcPtr)(double&));
-
-    operator double() const { return *value; }
-
-private:
-    double* value;
-
-    DoubleType& powInternal(double);
-};
-
-struct IntType
-{
-    explicit IntType(int i) : value(new int(i)) {}
-    ~IntType() { delete value; }
-
-    IntType& operator+=(int a);
-    IntType& operator-=(int s);
-    IntType& operator*=(int m);
-    IntType& operator/=(int d);
-    IntType& pow(int);
-    IntType& pow(const FloatType&);
-    IntType& pow(const DoubleType&);
-    IntType& pow(const IntType&);
-
-    IntType& apply(std::function<IntType&(int&)> func);
-    IntType& apply(void(*funcPtr)(int&));
-
-    operator int() const { return *value; }
-
-private:
-    int* value;
-
-    IntType& powInternal(int);
-};
-
-FloatType& FloatType::operator+=(float a)
-{
-    *value += a;
-    return *this;
-}
-
-FloatType& FloatType::operator-=(float s)
-{
-    *value -= s;
-    return *this;
-}
-
-FloatType& FloatType::operator*=(float m)
-{
-    *value *= m;
-    return *this;
-}
-
-FloatType& FloatType::operator/=(float d)
-{
-    if (d == 0.0f)
+    Numeric& operator+=(Type t)
     {
-        std::cout << "warning: floating point division by zero!" << std::endl;
+        *value += t;
+        return *this;
     }
 
-    *value /= d;
-    return *this;
-}
+    Numeric& operator-=(Type t)
+    {
+        *value -= t;
+        return *this;
+    }
 
-FloatType& FloatType::powInternal(float arg)
-{
-    *value = std::pow(*value, arg);
-    return *this;
-}
+    Numeric& operator*=(Type t)
+    {
+        *value *= t;
+        return *this;
+    }
 
-FloatType& FloatType::pow(float f)
-{
-    return powInternal(f);
-}
+    template<typename U>
+    Numeric& operator/=(U t)
+    {
+        //std::is_same<>::value
+        //std::numeric_limits<>::epsilon()
+        
+        if constexpr(std::is_same<Type,int>::value)
+        {
+            if constexpr(std::is_same<U,int>::value)
+            {
+                if( t == 0 )
+                {
+                    std::cout << "error: integer division by zero is an error and will crash the program!" << std::endl;
+                    return *this;
+                }
+            }
+            else if(t <= std::numeric_limits<U>::epsilon())
+            {
+                std::cout << "can't divide integers by zero!" << std::endl;
+                return *this;
+            }
+        }
+        else if(t <= std::numeric_limits<U>::epsilon())
+        {
+            std::cout << "warning: floating point division by zero!" << std::endl;
+        }
 
-FloatType& FloatType::pow(const FloatType& ft)
-{
-    return powInternal(static_cast<float>(ft));
-}
-
-FloatType& FloatType::pow(const DoubleType& dt)
-{
-    return powInternal(static_cast<float>(dt));
-}
-
-FloatType& FloatType::pow(const IntType& it)
-{
-    return powInternal(static_cast<float>(it));
-}
-
-FloatType& FloatType::apply(std::function<FloatType&(float& f)> func)
-{
-    if(func)
-        return func(*value);
-
-    return *this;
-}
-
-FloatType& FloatType::apply(void(*funcPtr)(float&))
-{
-    if(funcPtr)
-        funcPtr(*value);
+        *value /= static_cast<Type>(t);
+        return *this;
+    }
     
-    return *this;
-}
-
-void myFloatFreeFunct(float& f)
-{
-    f += 7.0f;
-}
-
-DoubleType& DoubleType::operator+=(double a)
-{
-    *value += a;
-    return *this;
-}
-
-DoubleType& DoubleType::operator-=(double s)
-{
-    *value -= s;
-    return *this;
-}
-
-DoubleType& DoubleType::operator*=(double m)
-{
-    *value *= m;
-    return *this;
-}
-
-DoubleType& DoubleType::operator/=(double d)
-{
-    if (d == 0.0)
+    Numeric& pow(Type t)
     {
-        std::cout << "warning: floating point division by zero!" << std::endl;
+        return powInternal(t);
     }
-    *value /= d;
-    return *this;
-}
 
-DoubleType& DoubleType::powInternal(double arg)
-{
-    *value = std::pow(*value, arg);
-    return *this;
-}
-
-DoubleType& DoubleType::pow(double d)
-{
-    return powInternal(d);
-}
-
-DoubleType& DoubleType::pow(const FloatType& ft)
-{
-    return powInternal(static_cast<double>(ft));
-}
-
-DoubleType& DoubleType::pow(const DoubleType& dt)
-{
-    return powInternal(static_cast<double>(dt));
-}
-
-DoubleType& DoubleType::pow(const IntType& it)
-{
-    return powInternal(static_cast<double>(it));
-}
-
-DoubleType& DoubleType::apply(std::function<DoubleType&(double&)> func)
-{
-    if(func)
-        return func(*value);
-
-    return *this;
-}
-
-DoubleType& DoubleType::apply(void(*funcPtr)(double&))
-{
-    if(funcPtr)
-        funcPtr(*value);
+    template<typename U>
+    Numeric& pow(const U& u)
+    {
+        return powInternal(static_cast<Type>(u));
+    }
     
-    return *this;
-}
-
-void myDoubleFreeFunct(double& d)
-{
-    d += 6.0;
-}
-
-IntType& IntType::operator+=(int a)
-{
-    *value += a;
-    return *this;
-}
-
-IntType& IntType::operator-=(int s)
-{
-    *value -= s;
-    return *this;
-}
-
-IntType& IntType::operator*=(int m)
-{
-    *value *= m;
-    return *this;
-}
-
-IntType& IntType::operator/=(int d)
-{
-    if (d == 0.0)
+    Numeric& apply(std::function<Numeric&(Numeric&)> func)
     {
-        std::cout << "error: integer division by zero is an error and will crash the program!" << std::endl;
+        if(func)
+            return func(*this);
+
+        return *this;
     }
-    else
+
+    Numeric& apply(void(*funcPtr)(Numeric&))
     {
-        *value /= d;
+        if(funcPtr)
+            funcPtr(*this);
+
+        return *this;
     }
-    return *this;
-}
 
-IntType& IntType::powInternal(int arg)
+    operator Type() const { return *value; }
+
+private:
+    std::unique_ptr<Type> value;
+
+    Numeric& powInternal(Type t)
+    {
+        if constexpr(std::is_same<Type,int>::value)
+        {
+            *value = static_cast<int>(std::pow(*value, t));
+        }
+        else
+        {
+            *value = std::pow(*value, t);
+        }
+        return *this;
+    }
+};
+
+template<>
+struct Numeric<double>
 {
-    *value = static_cast<int>(std::pow(*value, arg));
-    return *this;
-}
+    using Type = double;
 
-IntType& IntType::pow(int i)
-{
-    return powInternal(i);
-}
+    explicit Numeric(Type t) : value(std::make_unique<Type>(t)) {}
+    ~Numeric() {}
 
-IntType& IntType::pow(const FloatType& ft)
-{
-    return powInternal(static_cast<int>(ft));
-}
+    Numeric& operator+=(Type t)
+    {
+        *value += t;
+        return *this;
+    }
 
-IntType& IntType::pow(const DoubleType& dt)
-{
-    return powInternal(static_cast<int>(dt));
-}
+    Numeric& operator-=(Type t)
+    {
+        *value -= t;
+        return *this;
+    }
 
-IntType& IntType::pow(const IntType& it)
-{
-    return powInternal(static_cast<int>(it));
-}
+    Numeric& operator*=(Type t)
+    {
+        *value *= t;
+        return *this;
+    }
 
-IntType& IntType::apply(std::function<IntType&(int&)> func)
-{
-    if(func)
-        return func(*value);
+    Numeric& operator/=(Type t)
+    {
+        if (t == 0.0)
+        {
+            std::cout << "warning: floating point division by zero!" << std::endl;
+        }
 
-    return *this;
-}
+        *value /= t;
+        return *this;
+    }
 
-IntType& IntType::apply(void(*funcPtr)(int&))
-{
-    if(funcPtr)
-        funcPtr(*value);
+    Numeric& pow(Type t)
+    {
+        return powInternal(t);
+    }
 
-    return *this;
-}
+    template<typename U>
+    Numeric& pow(const U& u)
+    {
+        return powInternal(static_cast<Type>(u));
+    }
 
-void myIntFreeFunct(int& i)
-{
-    i += 5;
-}
+    template<typename Callable>
+    Numeric& apply(Callable func)
+    {
+        func(*this);
+        return *this;
+    }
+
+    /*
+    Numeric& apply(void(*funcPtr)(Numeric&))
+    {
+        if(funcPtr)
+            funcPtr(*this);
+
+        return *this;
+    }
+    */
+
+    operator Type() const { return *value; }
+
+private:
+    std::unique_ptr<Type> value;
+
+    Numeric& powInternal(Type t)
+    {
+        *value = std::pow(*value, t);
+        return *this;
+    }
+};
+
+
 
 void part3()
 {
-    FloatType ft(5.5f);
-    DoubleType dt(11.1);
-    IntType it(34);
-    DoubleType pi(3.14);
+    Numeric<float> ft(5.5f);
+    Numeric<double> dt(11.1);
+    Numeric<int> it(34);
+    Numeric<double> pi(3.14);
 
     ft *= ft;
     ft *= ft;
@@ -645,20 +473,11 @@ struct Point
         : x(xVal), y(yVal)
     {
     }
-    explicit Point(const FloatType& ft1, const FloatType& ft2)
-        :Point(static_cast<float>(ft1), static_cast<float>(ft2))
-    {
-    }
-    explicit Point(const DoubleType& dt1, const DoubleType& dt2)
-        :Point(static_cast<float>(dt1), static_cast<float>(dt2))
-    {
 
-    }
-
-    explicit Point(const IntType& it1, const IntType& it2)
-        :Point(static_cast<float>(it1), static_cast<float>(it2))
+    template<typename U, typename V>
+    explicit Point(const U& u, const V& v)
+        :Point(static_cast<float>(u), static_cast<float>(v))
     {
-
     }
 
     Point& multiply(float m)
@@ -668,19 +487,10 @@ struct Point
         return *this;
     }
 
-    Point& multiply(FloatType& ft)
+    template<typename T>
+    Point& multiply(T& t)
     {
-        return multiply(static_cast<float>(ft));
-    }
-
-    Point& multiply(DoubleType& dt)
-    {
-        return multiply(static_cast<float>(dt));
-    }
-
-    Point& multiply(IntType& it)
-    {
-        return multiply(static_cast<float>(it));
+        return multiply(static_cast<float>(t));
     }
 
     void toString()
@@ -697,15 +507,15 @@ void part4()
     // ------------------------------------------------------------
     //                          Power tests
     // ------------------------------------------------------------
-    FloatType ft1(2);
-    DoubleType dt1(2);
-    IntType it1(2);    
+    Numeric<float> ft1(2);
+    Numeric<double> dt1(2);
+    Numeric<int> it1(2);    
     float floatExp = 2.0f;
     double doubleExp = 2.0;
     int intExp = 2;
-    IntType itExp(2);
-    FloatType ftExp(2.0f);
-    DoubleType dtExp(2.0);
+    Numeric<int> itExp(2);
+    Numeric<float> ftExp(2.0f);
+    Numeric<double> dtExp(2.0);
 
     // Power tests with FloatType
     std::cout << "Power tests with FloatType " << std::endl;
@@ -734,9 +544,9 @@ void part4()
     // ------------------------------------------------------------
     //                          Point tests
     // ------------------------------------------------------------
-    FloatType ft2(3.0f);
-    DoubleType dt2(4.0);
-    IntType it2(5);
+    Numeric<float> ft2(3.0f);
+    Numeric<double> dt2(4.0);
+    Numeric<int> it2(5);
     float floatMul = 6.0f;
 
     // Point tests with float
@@ -776,52 +586,71 @@ void part4()
     std::cout << "---------------------\n" << std::endl;
 }
 
-void part6()
+template<typename T>
+void myNumericFreeFunct(Numeric<T>& n)
 {
-    FloatType ft3(3.0f);
-    DoubleType dt3(4.0);
-    IntType it3(5);
+    n += 7;
+}
 
-    std::cout << "Calling FloatType::apply() using a lambda (adds 7.0f) and FloatType as return type:" << std::endl;
+void part7()
+{
+    Numeric<float> ft3(3.0f);
+    Numeric<double> dt3(4.0);
+    Numeric<int> it3(5);
+
+    std::cout << "Calling Numeric<float>::apply() using a lambda (adds 7.0f) and Numeric<float> as return type:" << std::endl;
     std::cout << "ft3 before: " << ft3 << std::endl;
-    ft3.apply( [&ft3](float& f)->FloatType&
+
     {
-        f += 7.0f;
-        return ft3;
-    });
+        using Type = float;//#4;
+        //Numeric& apply(std::function<Numeric&(Numeric&)> func)
+        ft3.apply( [](Numeric<Type>& n)-> Numeric<decltype(ft3)::Type>& {
+            n += 7.0f;
+            return n;
+        } );
+    }
+
     std::cout << "ft3 after: " << ft3 << std::endl;
-    
-    std::cout << "Calling FloatType::apply() using a free function (adds 7.0f) and void as return type:" << std::endl;
+    std::cout << "Calling Numeric<float>::apply() twice using a free function (adds 7.0f) and void as return type:" << std::endl;
     std::cout << "ft3 before: " << ft3 << std::endl;
-    ft3.apply(myFloatFreeFunct);
+    ft3.apply(myNumericFreeFunct<float>).apply(myNumericFreeFunct<float>);
     std::cout << "ft3 after: " << ft3 << std::endl;
     std::cout << "---------------------\n" << std::endl;
 
-    std::cout << "Calling DoubleType::apply() using a lambda (adds 6.0) and DoubleType as return type:" << std::endl;
+    std::cout << "Calling Numeric<double>::apply() using a lambda (adds 6.0) and Numeric<double> as return type:" << std::endl;
     std::cout << "dt3 before: " << dt3 << std::endl;
-    dt3.apply( [&dt3](double& d)->DoubleType&
+
     {
-        d += 6.0;
-        return dt3;
-    });
+        //using Type = double;//#4;
+        //Numeric& apply(std::function<Numeric&(Numeric&)> func)
+        dt3.apply( [](Numeric<double>& n)-> Numeric<double>& {
+            n += 6.0;
+            return n;
+        } ); // This calls the templated apply fcn
+    }
+
     std::cout << "dt3 after: " << dt3 << std::endl;
-    std::cout << "Calling DoubleType::apply() using a free function (adds 6.0) and void as return type:" << std::endl;
+    std::cout << "Calling Numeric<double>::apply() twice using a free function (adds 7.0) and void as return type:" << std::endl;
     std::cout << "dt3 before: " << dt3 << std::endl;
-    dt3.apply(myDoubleFreeFunct);
+    dt3.apply(myNumericFreeFunct<double>).apply(myNumericFreeFunct<double>); // This calls the templated apply fcn
     std::cout << "dt3 after: " << dt3 << std::endl;
     std::cout << "---------------------\n" << std::endl;
 
-    std::cout << "Calling IntType::apply() using a lambda (adds 5) and IntType as return type:" << std::endl;
+    std::cout << "Calling Numeric<int>::apply() using a lambda (adds 5) and Numeric<int> as return type:" << std::endl;
     std::cout << "it3 before: " << it3 << std::endl;
-    it3.apply( [&it3](int& i)->IntType&
-        {
-            i += 5;
-            return it3;
-        });
+
+    {
+        using Type = int;//#4;
+        //Numeric& apply(std::function<Numeric&(Numeric&)> func)
+        it3.apply( [](Numeric<Type>& n)-> Numeric<decltype(it3)::Type>& {
+            n += 5;
+            return n;
+        } );
+    }
     std::cout << "it3 after: " << it3 << std::endl;
-    std::cout << "Calling IntType::apply() using a free function (adds 5) and void as return type:" << std::endl;
+    std::cout << "Calling Numeric<int>::apply() twice using a free function (adds 7) and void as return type:" << std::endl;
     std::cout << "it3 before: " << it3 << std::endl;
-    it3.apply(myIntFreeFunct);
+    it3.apply(myNumericFreeFunct<int>).apply(myNumericFreeFunct<int>);
     std::cout << "it3 after: " << it3 << std::endl;
     std::cout << "---------------------\n" << std::endl;    
 }
@@ -832,9 +661,9 @@ int main()
     HeapA heapA;
 
     //assign heap primitives
-    FloatType ft(2.0f);
-    DoubleType dt(2.0);
-    IntType it(2);
+    Numeric<float> ft(2.0f);
+    Numeric<double> dt(2.0);
+    Numeric<int> it(2);
 
     ft += 2.0f;
     std::cout << "FloatType add result=" << ft << std::endl;
@@ -921,7 +750,7 @@ int main()
 
     part3();
     part4();
-    part6();
+    part7();
 
     std::cout << "good to go!\n";
 

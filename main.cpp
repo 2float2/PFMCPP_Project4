@@ -249,6 +249,42 @@ struct HeapA
 #include <cmath>
 #include <functional>
 #include <memory>
+#include <limits>
+#include <typeinfo>
+
+template<typename NumericType>
+struct Temporary
+{
+    Temporary(NumericType t) : v(t)
+    {
+        std::cout << "I'm a Temporary<" << typeid(v).name() << "> object, #"
+                  << counter++ << std::endl;
+    }
+
+    /*
+     revise these conversion functions to read/write to 'v' here
+     hint: what qualifier do read-only functions usually have?
+     */
+    operator NumericType() const 
+    { 
+        /* read-only function */ 
+        return v;        
+    }
+
+    operator NumericType&() 
+    {
+        /* read/write function */ 
+        return v;
+    }
+
+private:
+    static int counter;
+    NumericType v;
+};
+
+template<typename NumericType>
+int Temporary<NumericType>::counter = 0;
+
 
 template<typename T>
 struct Numeric
@@ -258,7 +294,10 @@ struct Numeric
     explicit Numeric(Type t) : value(std::make_unique<Type>(t)) {}
     ~Numeric() {}
 
-    Numeric& operator+=(Type t)
+
+    
+    template<typename OtherType>
+    Numeric& operator=(const OtherType& o)
     {
         *value += t;
         return *this;
@@ -276,8 +315,16 @@ struct Numeric
         return *this;
     }
 
-    template<typename U>
-    Numeric& operator/=(U t)
+
+    template<typename OtherType>
+    Numeric& operator*=(const OtherType& o)
+    {
+        *value *= static_cast<Type>(o);
+        return *this;
+    }
+
+    template<typename OtherType>
+    Numeric& operator/=(const OtherType& t)
     {
         //std::is_same<>::value
         //std::numeric_limits<>::epsilon()
@@ -309,7 +356,8 @@ struct Numeric
     
     Numeric& pow(Type t)
     {
-        return powInternal(t);
+        *value = std::pow(static_cast<Type>(*value),static_cast<Type>(o));
+        return *this;
     }
 
     template<typename U>
@@ -317,23 +365,17 @@ struct Numeric
     {
         return powInternal(static_cast<Type>(u));
     }
-    
-    Numeric& apply(std::function<Numeric&(Numeric&)> func)
-    {
-        if(func)
-            return func(*this);
 
+    */
+
+    template<typename Callable>
+    Numeric& apply(Callable func)
+    {
+        func(*value);
         return *this;
     }
 
-    Numeric& apply(void(*funcPtr)(Numeric&))
-    {
-        if(funcPtr)
-            funcPtr(*this);
-
-        return *this;
-    }
-
+    operator Temporary<Type>() { return Temporary<Type>(*value); }
     operator Type() const { return *value; }
 
 private:
@@ -353,82 +395,7 @@ private:
     }
 };
 
-template<>
-struct Numeric<double>
-{
-    using Type = double;
 
-    explicit Numeric(Type t) : value(std::make_unique<Type>(t)) {}
-    ~Numeric() {}
-
-    Numeric& operator+=(Type t)
-    {
-        *value += t;
-        return *this;
-    }
-
-    Numeric& operator-=(Type t)
-    {
-        *value -= t;
-        return *this;
-    }
-
-    Numeric& operator*=(Type t)
-    {
-        *value *= t;
-        return *this;
-    }
-
-    Numeric& operator/=(Type t)
-    {
-        if (t == 0.0)
-        {
-            std::cout << "warning: floating point division by zero!" << std::endl;
-        }
-
-        *value /= t;
-        return *this;
-    }
-
-    Numeric& pow(Type t)
-    {
-        return powInternal(t);
-    }
-
-    template<typename U>
-    Numeric& pow(const U& u)
-    {
-        return powInternal(static_cast<Type>(u));
-    }
-
-    template<typename Callable>
-    Numeric& apply(Callable func)
-    {
-        func(*this);
-        return *this;
-    }
-
-    /*
-    Numeric& apply(void(*funcPtr)(Numeric&))
-    {
-        if(funcPtr)
-            funcPtr(*this);
-
-        return *this;
-    }
-    */
-
-    operator Type() const { return *value; }
-
-private:
-    std::unique_ptr<Type> value;
-
-    Numeric& powInternal(Type t)
-    {
-        *value = std::pow(*value, t);
-        return *this;
-    }
-};
 
 
 
@@ -595,68 +562,7 @@ void myNumericFreeFunct(Numeric<T>& n)
     n += 7;
 }
 
-void part7()
-{
-    Numeric<float> ft3(3.0f);
-    Numeric<double> dt3(4.0);
-    Numeric<int> it3(5);
 
-    std::cout << "Calling Numeric<float>::apply() using a lambda (adds 7.0f) and Numeric<float> as return type:" << std::endl;
-    std::cout << "ft3 before: " << ft3 << std::endl;
-
-    {
-        using Type = float;//#4;
-        //Numeric& apply(std::function<Numeric&(Numeric&)> func)
-        ft3.apply( [](Numeric<Type>& n)-> Numeric<decltype(ft3)::Type>& {
-            n += 7.0f;
-            return n;
-        } );
-    }
-
-    std::cout << "ft3 after: " << ft3 << std::endl;
-    std::cout << "Calling Numeric<float>::apply() twice using a free function (adds 7.0f) and void as return type:" << std::endl;
-    std::cout << "ft3 before: " << ft3 << std::endl;
-    ft3.apply(myNumericFreeFunct<float>).apply(myNumericFreeFunct<float>);
-    std::cout << "ft3 after: " << ft3 << std::endl;
-    std::cout << "---------------------\n" << std::endl;
-
-    std::cout << "Calling Numeric<double>::apply() using a lambda (adds 6.0) and Numeric<double> as return type:" << std::endl;
-    std::cout << "dt3 before: " << dt3 << std::endl;
-
-    {
-        //using Type = double;//#4;
-        //Numeric& apply(std::function<Numeric&(Numeric&)> func)
-        dt3.apply( [](Numeric<double>& n)-> Numeric<double>& {
-            n += 6.0;
-            return n;
-        } ); // This calls the templated apply fcn
-    }
-
-    std::cout << "dt3 after: " << dt3 << std::endl;
-    std::cout << "Calling Numeric<double>::apply() twice using a free function (adds 7.0) and void as return type:" << std::endl;
-    std::cout << "dt3 before: " << dt3 << std::endl;
-    dt3.apply(myNumericFreeFunct<double>).apply(myNumericFreeFunct<double>); // This calls the templated apply fcn
-    std::cout << "dt3 after: " << dt3 << std::endl;
-    std::cout << "---------------------\n" << std::endl;
-
-    std::cout << "Calling Numeric<int>::apply() using a lambda (adds 5) and Numeric<int> as return type:" << std::endl;
-    std::cout << "it3 before: " << it3 << std::endl;
-
-    {
-        using Type = int;//#4;
-        //Numeric& apply(std::function<Numeric&(Numeric&)> func)
-        it3.apply( [](Numeric<Type>& n)-> Numeric<decltype(it3)::Type>& {
-            n += 5;
-            return n;
-        } );
-    }
-    std::cout << "it3 after: " << it3 << std::endl;
-    std::cout << "Calling Numeric<int>::apply() twice using a free function (adds 7) and void as return type:" << std::endl;
-    std::cout << "it3 before: " << it3 << std::endl;
-    it3.apply(myNumericFreeFunct<int>).apply(myNumericFreeFunct<int>);
-    std::cout << "it3 after: " << it3 << std::endl;
-    std::cout << "---------------------\n" << std::endl;    
-}
 
 int main()
 {
@@ -689,75 +595,63 @@ int main()
     dt *= 2.0;
     std::cout << "DoubleType multiply result=" << dt << std::endl;
 
-    dt /= 5.0;
-    std::cout << "DoubleType divide result=" << dt << std::endl << std::endl;
 
-    it += 2;
-    std::cout << "IntType add result=" << it << std::endl;
+    {
+        using Type = decltype(f)::Type;
+        f.apply([&f](Temporary<Type>& temp) -> decltype(f)&
+                {
+                    auto& v = temp;
+                    v = v * v;
+                    return f;
+                });
+        std::cout << "f squared: " << f << std::endl;
 
-    it -= 2;
-    std::cout << "IntType subtract result=" << it << std::endl;
+        f.apply([&f](Temporary<Type>& temp) -> decltype(f)&
+                {
+                    auto& v = temp;
+                    v = v * v * v;
+                    return f;
+                });
+        std::cout << "f cubed: " << f << std::endl;
+    }
 
-    it *= 2;
-    std::cout << "IntType multiply result=" << it << std::endl;
+    {
+        using Type = decltype(d)::Type;
+        d.apply([&d](Temporary<Type>& temp) -> decltype(d)&
+                {
+                    auto& v = temp;
+                    v = v * v;
+                    return d;
+                });
+        std::cout << "d squared: " << d << std::endl;
 
-    it /= 3;
-    std::cout << "IntType divide result=" << it << std::endl << std::endl;
+        d.apply([&d](Temporary<Type>& temp) -> decltype(d)&
+                {
+                    auto& v = temp;
+                    v = v * v * v;
+                    return d;
+                });
+        std::cout << "d cubed: " << d << std::endl;
+    }
 
-    it *= 1000;
-    it /= 2;
-    it -= 10;
-    it += 100;
-    std::cout << "Chain calculation = " << it << std::endl;
+    {
+        using Type = decltype(i)::Type;
+        i.apply([&i](Temporary<Type>& temp) -> decltype(i)&
+                {
+                    auto& v = temp;
+                    v = v * v;
+                    return i;
+                });
+        std::cout << "i squared: " << i << std::endl;
 
-    // FloatType object instanciation and method tests
-// --------
-    ft += 3.0f;
-    ft *= 1.5f;
-    ft /= 5.0f;
-    std::cout << "New value of ft = (ft + 3.0f) * 1.5f / 5.0f = " << ft << std::endl;
-
-    std::cout << "---------------------\n" << std::endl;
-
-    // DoubleType/IntType object instanciation and method tests
-    // --------
-    std::cout << "Initial value of dt: " << dt << std::endl;
-    std::cout << "Initial value of it: " << it << std::endl;
-    // --------
-    std::cout << "Use of function concatenation (mixed type arguments) " << std::endl;
-
-    dt *= static_cast<double>(it);
-    dt /= 5.0;
-    dt += static_cast<double>(ft);
-    std::cout << "New value of dt = (dt * it) / 5.0f + ft = " << dt << std::endl;
-
-    std::cout << "---------------------\n" << std::endl;
-
-    // Intercept division by 0
-    // --------
-    std::cout << "Intercept division by 0 " << std::endl;
-
-    std::cout << "New value of it = it / 0 = ";
-    it /= 0;
-    std::cout << it << std::endl;
-
-    std::cout << "New value of ft = ft / 0 = ";
-    ft /= 0;
-    std::cout << ft << std::endl;
-
-    std::cout << "New value of dt = dt / 0 = ";
-    dt /= 0;
-    std::cout << dt << std::endl;
-
-    std::cout << "---------------------\n" << std::endl;
-
-    part3();
-    part4();
-    part7();
-
-    std::cout << "good to go!\n";
-
-    return 0;
+        i.apply([&i](Temporary<Type>& temp) -> decltype(i)&
+                {
+                    auto& v = temp;
+                    v = v * v * v;
+                    return i;
+                });
+        std::cout << "i cubed: " << i << std::endl;
+    }
 }
 
 
